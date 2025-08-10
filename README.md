@@ -39,8 +39,8 @@ A modern **Hospital Management System** built with **HTML, CSS (Bootstrap 5)**, 
 ---
 
 ## 🐱‍👤 Structure
-📂 hospital-management-system
- ├── index.html         Main UI
+📂 hospital-management-system <br>
+ ├── index.html         Main UI <br>
  ├── script.js          App logic (CRUD, filtering, stats)
  ├── style.css          Custom styles (optional)
  ├── screenshot.png     Preview image
