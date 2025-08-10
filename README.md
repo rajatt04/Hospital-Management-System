@@ -40,11 +40,11 @@ A modern **Hospital Management System** built with **HTML, CSS (Bootstrap 5)**, 
 
 ## 🐱‍👤 Structure
 📂 hospital-management-system
- ├── index.html         # Main UI
- ├── script.js          # App logic (CRUD, filtering, stats)
- ├── style.css          # Custom styles (optional)
- ├── screenshot.png     # Preview image
- └── README.md          # Project documentation
+ ├── index.html         Main UI
+ ├── script.js          App logic (CRUD, filtering, stats)
+ ├── style.css          Custom styles (optional)
+ ├── screenshot.png     Preview image
+ └── README.md          Project documentation
 
 ---
 
@@ -74,6 +74,9 @@ This project is MIT Licensed — free to use and modify.
 ```bash
 git clone https://github.com/yourusername/hospital-management-system.git
 cd hospital-management-system
+```
 
 ### 2️⃣ Open in Browser
+```bash
 Simply open the index.html file in your preferred browser.
+```
