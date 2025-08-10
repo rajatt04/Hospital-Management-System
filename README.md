@@ -41,20 +41,20 @@ A modern **Hospital Management System** built with **HTML, CSS (Bootstrap 5)**, 
 ## 🐱‍👤 Structure
 📂 hospital-management-system <br>
  ├── index.html         Main UI <br>
- ├── script.js          App logic (CRUD, filtering, stats)
- ├── style.css          Custom styles (optional)
- ├── screenshot.png     Preview image
- └── README.md          Project documentation
+ ├── script.js          App logic (CRUD, filtering, stats) <br>
+ ├── style.css          Custom styles (optional) <br>
+ ├── screenshot.png     Preview image <br>
+ └── README.md          Project documentation <br>
 
 ---
 
 ## 🔮 Future Improvements
 
-🩺 Doctor & Staff Management
-💊 Medicine Inventory Tracking
-📅 Appointment Scheduling System
-📱 Responsive Mobile-first UI Enhancements
-☁ Database Integration (MySQL / Firebase)
+🩺 Doctor & Staff Management <br>
+💊 Medicine Inventory Tracking <br>
+📅 Appointment Scheduling System <br>
+📱 Responsive Mobile-first UI Enhancements <br>
+☁ Database Integration (MySQL / Firebase) <br>
 
 ---
 
