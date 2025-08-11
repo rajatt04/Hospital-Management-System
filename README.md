@@ -27,6 +27,14 @@ A modern **Hospital Management System** built with **HTML, CSS (Bootstrap 5)**, 
 
 ---
 
+## Screenshots
+
+| Screenshot 1      | Screenshot 2      |
+|-------------------|-------------------|
+| ![Image1](https://github.com/rajatt04/Hospital-Management-System/blob/main/Screenshot%20(41).png?raw=true) | ![Image2](https://github.com/rajatt04/Hospital-Management-System/blob/main/Screenshot%20(42).png?raw=true) |
+
+---
+
 ## 🛠 Tech Stack  
 
 | Technology          | Usage                               |
