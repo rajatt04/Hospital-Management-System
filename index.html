@@ -1,43 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hospital Management System</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+  />
   <style>
     body {
       background-color: #f8faff;
       font-family: "Segoe UI", system-ui, sans-serif;
-      transition: background-color 0.3s, color 0.3s;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      min-height: 100vh;
+      margin: 0;
     }
+
+      .user-pfp {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0056b3, #ff33ff);
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        margin-right: 14px;
+        flex-shrink: 0;
+        text-transform: uppercase;
+        box-shadow:
+          0 2px 4px rgba(0, 0, 0, 0.25),
+          inset 0 -3px 6px rgba(255, 255, 255, 0.2);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+        transition: 
+          background 0.3s ease,
+          box-shadow 0.3s ease,
+          transform 0.2s ease;
+        cursor: default;
+      }
+
+      .user-pfp:hover {
+        background: linear-gradient(135deg, #004494, #66b3ff);
+        box-shadow:
+          0 6px 12px rgba(0, 85, 179, 0.6),
+          inset 0 -3px 8px rgba(255, 255, 255, 0.35);
+        transform: scale(1.1);
+      }
+
+    /* Navbar */
     .navbar {
-      background: linear-gradient(90deg, #007bff, #00aaff);
+      background: linear-gradient(90deg, #007bff 0%, #00aaff 100%);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      transition: background-color 0.3s;
+      transition: background-color 0.3s ease;
     }
+
+    /* Cards */
     .card {
       border: none;
       border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    }
-    #statsCard {
-      background: linear-gradient(135deg, #d0ebff, #b3e5fc);
-      border-radius: 16px;
-      border: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+      background-color: #fff;
+      color: #212529;
     }
 
-    /* Floating Toggle Button */
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Stats card special style */
+    #statsCard {
+      background: linear-gradient(135deg, #d0ebff 0%, #b3e5fc 100%);
+      border-radius: 16px;
+      border: none;
+      color: #212529;
+    }
+
+    /* Buttons */
+    button {
+      cursor: pointer;
+    }
+
+    /* Floating Dark Mode Toggle */
     .dark-toggle {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background: #007bff;
+      background-color: #007bff;
       color: white;
       border: none;
       border-radius: 50%;
@@ -48,13 +103,15 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.3s ease, transform 0.2s ease;
       z-index: 9999;
     }
-    .dark-toggle:hover {
-      background: #0056b3;
+    .dark-toggle:hover,
+    .dark-toggle:focus {
+      background-color: #0056b3;
       transform: scale(1.1);
+      outline: none;
     }
 
     /* Dark Mode Styles */
@@ -63,25 +120,53 @@
       color: #f8f9fa;
     }
     body.dark-mode .navbar {
-      background: linear-gradient(90deg, #111, #222);
+      background: linear-gradient(90deg, #111 0%, #222 100%);
+      box-shadow: 0 4px 12px rgba(255 255 255 / 0.05);
     }
     body.dark-mode .card {
       background-color: #2b2b2b;
       color: #f8f9fa;
       box-shadow: none;
     }
-    body.dark-mode .form-control, 
-    body.dark-mode .form-select, 
+    body.dark-mode .form-control,
+    body.dark-mode .form-select,
     body.dark-mode textarea {
       background-color: #3a3a3a;
       color: #fff;
       border-color: #555;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    body.dark-mode .form-control::placeholder,
+    body.dark-mode textarea::placeholder {
+      color: #bbb;
     }
     body.dark-mode .btn-primary {
-      background: linear-gradient(90deg, #006ae6, #0096e6);
+      background: linear-gradient(90deg, #006ae6 0%, #0096e6 100%);
+      border-color: transparent;
+      transition: background-color 0.3s ease;
+    }
+    body.dark-mode .btn-primary:hover,
+    body.dark-mode .btn-primary:focus {
+      background: linear-gradient(90deg, #0055cc 0%, #0080ff 100%);
     }
     body.dark-mode #statsCard {
-      background: linear-gradient(135deg, #3a3a3a, #2b2b2b);
+      background: linear-gradient(135deg, #3a3a3a 0%, #2b2b2b 100%);
+      color: #f8f9fa;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 767.98px) {
+      .container > .row {
+        flex-direction: column;
+      }
+      .col-md-4,
+      .col-md-8 {
+        max-width: 100% !important;
+        flex: 1 0 100% !important;
+      }
+      #patientsCards {
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -93,14 +178,14 @@
         <i class="bi bi-hospital me-2"></i> Hospital Management System
       </span>
       <div>
-        <button id="refreshBtn" class="btn btn-light btn-sm me-2">
+        <button id="refreshBtn" class="btn btn-light btn-sm me-2" type="button" aria-label="Refresh Patient List">
           <i class="bi bi-arrow-clockwise"></i> Refresh
         </button>
-        <button id="importCsvBtn" class="btn btn-light btn-sm me-2">
+        <button id="importCsvBtn" class="btn btn-light btn-sm me-2" type="button" aria-label="Import Patients CSV">
           <i class="bi bi-file-earmark-arrow-up"></i> Import CSV
         </button>
-        <input id="importFile" type="file" accept=".csv" style="display:none">
-        <button id="exportBtn" class="btn btn-light btn-sm">
+        <input id="importFile" type="file" accept=".csv" style="display:none" />
+        <button id="exportBtn" class="btn btn-light btn-sm" type="button" aria-label="Export Patients CSV">
           <i class="bi bi-file-earmark-arrow-down"></i> Export CSV
         </button>
       </div>
@@ -117,43 +202,61 @@
             <h5 class="card-title mb-3">
               <i class="bi bi-person-plus me-2"></i> Add / Edit Patient
             </h5>
-            <form id="patientForm">
-              <input type="hidden" id="patientId">
+            <form id="patientForm" novalidate>
+              <input type="hidden" id="patientId" />
               <div class="mb-3">
-                <label class="form-label">Name</label>
-                <input id="name" class="form-control" placeholder="Enter full name" required>
+                <label class="form-label" for="name">Name</label>
+                <input
+                  id="name"
+                  class="form-control"
+                  type="text"
+                  placeholder="Enter full name"
+                  required
+                  aria-required="true"
+                  aria-describedby="nameHelp"
+                />
               </div>
               <div class="mb-3">
-                <label class="form-label">Age</label>
-                <input id="age" type="number" class="form-control" placeholder="Patient age" required>
+                <label class="form-label" for="age">Age</label>
+                <input
+                  id="age"
+                  type="number"
+                  min="0"
+                  max="150"
+                  class="form-control"
+                  placeholder="Patient age"
+                  required
+                  aria-required="true"
+                  aria-describedby="ageHelp"
+                />
               </div>
               <div class="mb-3">
-                <label class="form-label">Gender</label>
-                <select id="gender" class="form-select" required>
-                  <option value="">Select gender</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                  <option>Other</option>
+                <label class="form-label" for="gender">Gender</label>
+                <select id="gender" class="form-select" required aria-required="true">
+                  <option value="" selected disabled>Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
               <div class="mb-3">
-                <label class="form-label">Department</label>
-                <select id="department" class="form-select" required>
-                  <option value="">Select Department</option>
-                  <option>Cardiology</option>
-                  <option>Orthopedics</option>
-                  <option>Neurology</option>
-                  <option>Pediatrics</option>
-                  <option>General Medicine</option>
+                <label class="form-label" for="department">Department</label>
+                <select id="department" class="form-select" required aria-required="true">
+                  <option value="" selected disabled>Select Department</option>
+                  <option value="Cardiology">Cardiology</option>
+                  <option value="Orthopedics">Orthopedics</option>
+                  <option value="Neurology">Neurology</option>
+                  <option value="Pediatrics">Pediatrics</option>
+                  <option value="General Medicine">General Medicine</option>
                 </select>
               </div>
               <div class="mb-3">
-                <label class="form-label">Phone</label>
-                <input id="phone" class="form-control" placeholder="Contact number">
+                <label class="form-label" for="phone">Phone</label>
+                <input id="phone" class="form-control" type="tel" placeholder="Contact number" />
               </div>
               <div class="mb-3">
-                <label class="form-label">Notes</label>
-                <textarea id="notes" class="form-control" placeholder="Additional notes"></textarea>
+                <label class="form-label" for="notes">Notes</label>
+                <textarea id="notes" class="form-control" rows="3" placeholder="Additional notes"></textarea>
               </div>
               <button type="submit" class="btn btn-primary w-100">
                 <i class="bi bi-save me-1"></i> Save Patient
@@ -171,41 +274,55 @@
         <div class="card">
           <div class="card-body">
             <div class="d-flex mb-3 flex-wrap gap-2">
-              <input id="search" class="form-control" placeholder="Search by name or phone" style="flex:1">
-              <select id="filterDept" class="form-select" style="width:auto">
+              <input
+                id="search"
+                class="form-control"
+                type="search"
+                placeholder="Search by name or phone"
+                style="flex: 1 1 auto"
+                aria-label="Search Patients"
+              />
+              <select id="filterDept" class="form-select" style="width: auto" aria-label="Filter by Department">
                 <option value="">All Departments</option>
-                <option>Cardiology</option>
-                <option>Orthopedics</option>
-                <option>Neurology</option>
-                <option>Pediatrics</option>
-                <option>General Medicine</option>
+                <option value="Cardiology">Cardiology</option>
+                <option value="Orthopedics">Orthopedics</option>
+                <option value="Neurology">Neurology</option>
+                <option value="Pediatrics">Pediatrics</option>
+                <option value="General Medicine">General Medicine</option>
               </select>
-              <select id="sortBy" class="form-select" style="width:auto">
+              <select id="sortBy" class="form-select" style="width: auto" aria-label="Sort Patients By">
                 <option value="admission_date">Sort: Admission Date</option>
                 <option value="name">Sort: Name</option>
                 <option value="age">Sort: Age</option>
               </select>
-              <select id="order" class="form-select" style="width:auto">
+              <select id="order" class="form-select" style="width: auto" aria-label="Sort Order">
                 <option value="desc">Desc</option>
                 <option value="asc">Asc</option>
               </select>
             </div>
-            <div id="patientsCards" class="row g-3"></div>
-            <div class="d-flex justify-content-between mt-3 align-items-center">
+
+            <div id="patientsCards" class="row g-3" aria-live="polite" aria-atomic="true"></div>
+
+            <div
+              class="d-flex justify-content-between mt-3 align-items-center"
+              role="navigation"
+              aria-label="Pagination Navigation"
+            >
               <div>
-                <button id="prevPage" class="btn btn-sm btn-secondary">
+                <button id="prevPage" class="btn btn-sm btn-secondary" type="button" aria-label="Previous Page">
                   <i class="bi bi-chevron-left"></i> Prev
                 </button>
-                <button id="nextPage" class="btn btn-sm btn-secondary">
+                <button id="nextPage" class="btn btn-sm btn-secondary" type="button" aria-label="Next Page">
                   Next <i class="bi bi-chevron-right"></i>
                 </button>
               </div>
-              <div id="pagerInfo"></div>
-              <button id="statsBtn" class="btn btn-sm btn-info">
+              <div id="pagerInfo" aria-live="polite" aria-atomic="true"></div>
+              <button id="statsBtn" class="btn btn-sm btn-info" type="button" aria-label="Show Statistics">
                 <i class="bi bi-bar-chart"></i> Show Stats
               </button>
             </div>
-            <div id="statsCard" class="card mt-3 d-none">
+
+            <div id="statsCard" class="card mt-3 d-none" role="region" aria-label="Statistics">
               <div class="card-body" id="statsBody"></div>
             </div>
           </div>
@@ -215,21 +332,27 @@
   </div>
 
   <!-- Dark Mode Toggle -->
-  <button class="dark-toggle" id="darkModeToggle">
-    <i class="bi bi-moon-fill"></i>
+  <button
+    class="dark-toggle"
+    id="darkModeToggle"
+    type="button"
+    aria-label="Toggle dark mode"
+    title="Toggle dark mode"
+  >
+    <i class="bi bi-moon-fill" aria-hidden="true"></i>
   </button>
 
   <script src="script.js"></script>
 
   <script>
-    const toggleBtn = document.getElementById('darkModeToggle');
-    toggleBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const icon = toggleBtn.querySelector('i');
-      if (document.body.classList.contains('dark-mode')) {
-        icon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+    const toggleBtn = document.getElementById("darkModeToggle");
+    toggleBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      const icon = toggleBtn.querySelector("i");
+      if (document.body.classList.contains("dark-mode")) {
+        icon.classList.replace("bi-moon-fill", "bi-sun-fill");
       } else {
-        icon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+        icon.classList.replace("bi-sun-fill", "bi-moon-fill");
       }
     });
   </script>

@@ -1,207 +1,310 @@
-let patients = [];
+// script.js
+
+const API_BASE = "/patients";
+
 let currentPage = 1;
-const pageSize = 6;
+const perPage = 10;
 
-document.getElementById('patientForm').addEventListener('submit', savePatient);
-document.getElementById('clearBtn').addEventListener('click', clearForm);
-document.getElementById('refreshBtn').addEventListener('click', () => renderPatients(getPagedPatients()));
-document.getElementById('search').addEventListener('input', applyFilters);
-document.getElementById('filterDept').addEventListener('change', applyFilters);
-document.getElementById('sortBy').addEventListener('change', applyFilters);
-document.getElementById('order').addEventListener('change', applyFilters);
-document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
-document.getElementById('nextPage').addEventListener('click', () => changePage(1));
-document.getElementById('statsBtn').addEventListener('click', toggleStats);
+const patientForm = document.getElementById("patientForm");
+const patientIdInput = document.getElementById("patientId");
+const nameInput = document.getElementById("name");
+const ageInput = document.getElementById("age");
+const genderInput = document.getElementById("gender");
+const departmentInput = document.getElementById("department");
+const phoneInput = document.getElementById("phone");
+const notesInput = document.getElementById("notes");
 
-// CSV Import/Export
-document.getElementById('importCsvBtn').addEventListener('click', () => document.getElementById('importFile').click());
-document.getElementById('importFile').addEventListener('change', importCSV);
-document.getElementById('exportBtn').addEventListener('click', exportCSV);
+const searchInput = document.getElementById("search");
+const filterDept = document.getElementById("filterDept");
+const sortBySelect = document.getElementById("sortBy");
+const orderSelect = document.getElementById("order");
 
-function savePatient(e) {
-  e.preventDefault();
-  const id = document.getElementById('patientId').value;
-  const patient = {
-    id: id || Date.now().toString(),
-    name: document.getElementById('name').value,
-    age: parseInt(document.getElementById('age').value),
-    gender: document.getElementById('gender').value,
-    department: document.getElementById('department').value,
-    phone: document.getElementById('phone').value,
-    notes: document.getElementById('notes').value,
-    admission_date: new Date().toLocaleDateString(),
-    status: "Admitted"
+const patientsCards = document.getElementById("patientsCards");
+const prevPageBtn = document.getElementById("prevPage");
+const nextPageBtn = document.getElementById("nextPage");
+const pagerInfo = document.getElementById("pagerInfo");
+const statsBtn = document.getElementById("statsBtn");
+const statsCard = document.getElementById("statsCard");
+const statsBody = document.getElementById("statsBody");
+
+const refreshBtn = document.getElementById("refreshBtn");
+const importCsvBtn = document.getElementById("importCsvBtn");
+const importFileInput = document.getElementById("importFile");
+const exportBtn = document.getElementById("exportBtn");
+
+function buildQueryParams(params) {
+  return Object.entries(params)
+    .filter(([_, v]) => v !== "" && v !== null && v !== undefined)
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join("&");
+}
+
+async function fetchPatients(page = 1) {
+  const q = {
+    page,
+    per_page: perPage,
+    search: searchInput.value.trim(),
+    department: filterDept.value,
+    sort_by: sortBySelect.value,
+    order: orderSelect.value,
   };
 
-  if (id) {
-    const index = patients.findIndex(p => p.id === id);
-    patients[index] = patient;
-  } else {
-    patients.push(patient);
-  }
-  clearForm();
-  applyFilters();
-}
+  const queryString = buildQueryParams(q);
+  try {
+    const res = await fetch(`${API_BASE}?${queryString}`);
+    if (!res.ok) throw new Error(`Error fetching patients: ${res.statusText}`);
+    const data = await res.json();
 
-function clearForm() {
-  document.getElementById('patientForm').reset();
-  document.getElementById('patientId').value = '';
-}
-
-function applyFilters() {
-  let filtered = [...patients];
-  const search = document.getElementById('search').value.toLowerCase();
-  const dept = document.getElementById('filterDept').value;
-  const sortBy = document.getElementById('sortBy').value;
-  const order = document.getElementById('order').value;
-
-  if (search) {
-    filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || p.phone.includes(search));
-  }
-  if (dept) {
-    filtered = filtered.filter(p => p.department === dept);
-  }
-
-  filtered.sort((a, b) => {
-    if (order === 'asc') return a[sortBy] > b[sortBy] ? 1 : -1;
-    return a[sortBy] < b[sortBy] ? 1 : -1;
-  });
-
-  currentPage = 1;
-  renderPatients(filtered.slice(0, pageSize));
-  updatePagerInfo(filtered.length);
-}
-
-function getPagedPatients() {
-  const start = (currentPage - 1) * pageSize;
-  return patients.slice(start, start + pageSize);
-}
-
-function changePage(dir) {
-  const totalPages = Math.ceil(patients.length / pageSize);
-  if ((dir === -1 && currentPage > 1) || (dir === 1 && currentPage < totalPages)) {
-    currentPage += dir;
-    renderPatients(getPagedPatients());
-    updatePagerInfo(patients.length);
+    renderPatients(data.items);
+    updatePagination(data.total, data.page, data.per_page);
+    statsCard.classList.add("d-none");
+  } catch (err) {
+    alert(err.message);
   }
 }
 
-function updatePagerInfo(total) {
-  document.getElementById('pagerInfo').textContent = `Page ${currentPage} of ${Math.ceil(total / pageSize)}`;
-}
+function renderPatients(patients) {
+  patientsCards.innerHTML = "";
 
-function renderPatients(list) {
-  const container = document.getElementById('patientsCards');
-  container.innerHTML = '';
-  list.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'col-md-6 col-lg-4';
+  if (!patients.length) {
+    patientsCards.innerHTML = `<p class="text-center text-muted">No patients found.</p>`;
+    return;
+  }
+
+  patients.forEach((patient) => {
+    const card = document.createElement("div");
+    card.className = "col-md-6 col-lg-4";
+
+    const statusBadgeClass = patient.status === "discharged" ? "bg-success" : "bg-primary";
+
+    const firstLetter = patient.name ? patient.name[0].toUpperCase() : "?";
+
     card.innerHTML = `
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="mb-0">${p.name}</h5>
-            <span class="badge bg-${getDeptColor(p.department)} badge-dept">${p.department}</span>
+      <div class="card h-100">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center mb-2">
+            <div class="user-pfp">${firstLetter}</div>
+            <h5 class="card-title mb-0">${patient.name}</h5>
           </div>
-          <p class="text-muted mb-1"><i class="bi bi-person"></i> Age: ${p.age} | ${p.gender}</p>
-          <p class="text-muted mb-1"><i class="bi bi-telephone"></i> ${p.phone || 'N/A'}</p>
-          <p class="mb-2"><i class="bi bi-calendar-event"></i> Admitted: ${p.admission_date}</p>
-          <span class="badge ${p.status === 'Admitted' ? 'bg-success' : 'bg-secondary'}">${p.status}</span>
-        </div>
-        <div class="card-footer bg-light d-flex justify-content-end gap-2">
-          <button class="btn btn-sm btn-outline-primary" onclick="editPatient('${p.id}')">
-            <i class="bi bi-pencil"></i> Edit
-          </button>
-          <button class="btn btn-sm btn-outline-danger" onclick="deletePatient('${p.id}')">
-            <i class="bi bi-trash"></i> Delete
-          </button>
+          <p class="mb-1"><strong>Age:</strong> ${patient.age}</p>
+          <p class="mb-1"><strong>Gender:</strong> ${patient.gender}</p>
+          <p class="mb-1"><strong>Department:</strong> ${patient.department}</p>
+          <p class="mb-1"><strong>Phone:</strong> ${patient.phone || "-"}</p>
+          <p class="mb-1"><strong>Status:</strong> <span class="badge ${statusBadgeClass}">${patient.status}</span></p>
+          <p class="mb-3 text-truncate"><strong>Notes:</strong> ${patient.notes || "-"}</p>
+          <div class="mt-auto d-flex gap-2">
+            <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${patient.id}">
+              <i class="bi bi-pencil"></i> Edit
+            </button>
+            <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${patient.id}">
+              <i class="bi bi-trash"></i> Delete
+            </button>
+          </div>
         </div>
       </div>
     `;
-    container.appendChild(card);
+
+    patientsCards.appendChild(card);
   });
+
+  // Attach listeners to Edit/Delete buttons
+  document.querySelectorAll(".edit-btn").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      loadPatient(id);
+    })
+  );
+
+  document.querySelectorAll(".delete-btn").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      if (confirm("Are you sure you want to delete this patient?")) {
+        deletePatient(id);
+      }
+    })
+  );
 }
 
-function getDeptColor(dept) {
-  switch(dept) {
-    case 'Cardiology': return 'danger';
-    case 'Orthopedics': return 'warning';
-    case 'Neurology': return 'info';
-    case 'Pediatrics': return 'success';
-    case 'General Medicine': return 'primary';
-    default: return 'secondary';
+function updatePagination(total, page, perPage) {
+  currentPage = page;
+  const totalPages = Math.ceil(total / perPage);
+
+  prevPageBtn.disabled = page <= 1;
+  nextPageBtn.disabled = page >= totalPages || totalPages === 0;
+
+  pagerInfo.textContent = `Page ${page} of ${totalPages} (${total} patients)`;
+}
+
+async function loadPatient(id) {
+  try {
+    const res = await fetch(`${API_BASE}/${id}`);
+    if (!res.ok) throw new Error("Failed to load patient");
+    const patient = await res.json();
+
+    patientIdInput.value = patient.id;
+    nameInput.value = patient.name;
+    ageInput.value = patient.age;
+    genderInput.value = patient.gender;
+    departmentInput.value = patient.department;
+    phoneInput.value = patient.phone || "";
+    notesInput.value = patient.notes || "";
+  } catch (err) {
+    alert(err.message);
   }
 }
 
-function editPatient(id) {
-  const p = patients.find(pt => pt.id === id);
-  document.getElementById('patientId').value = p.id;
-  document.getElementById('name').value = p.name;
-  document.getElementById('age').value = p.age;
-  document.getElementById('gender').value = p.gender;
-  document.getElementById('department').value = p.department;
-  document.getElementById('phone').value = p.phone;
-  document.getElementById('notes').value = p.notes;
-}
-
-function deletePatient(id) {
-  patients = patients.filter(p => p.id !== id);
-  applyFilters();
-}
-
-function toggleStats() {
-  const statsCard = document.getElementById('statsCard');
-  statsCard.classList.toggle('d-none');
-  if (!statsCard.classList.contains('d-none')) {
-    const stats = {};
-    patients.forEach(p => {
-      stats[p.department] = (stats[p.department] || 0) + 1;
-    });
-    let html = '<h6>Department Stats</h6><ul>';
-    for (let dept in stats) {
-      html += `<li>${dept}: ${stats[dept]} patients</li>`;
-    }
-    html += '</ul>';
-    document.getElementById('statsBody').innerHTML = html;
+async function deletePatient(id) {
+  try {
+    const res = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Failed to delete patient");
+    await fetchPatients(currentPage);
+  } catch (err) {
+    alert(err.message);
   }
 }
 
-function importCSV(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(evt) {
-    const lines = evt.target.result.split('\n').map(l => l.trim()).filter(Boolean);
-    lines.forEach(line => {
-      const [name, age, gender, department, phone, notes] = line.split(',');
-      patients.push({
-        id: Date.now().toString() + Math.random(),
-        name, age: parseInt(age), gender, department, phone, notes,
-        admission_date: new Date().toLocaleDateString(),
-        status: "Admitted"
-      });
-    });
-    applyFilters();
+patientForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const id = patientIdInput.value.trim();
+  const payload = {
+    name: nameInput.value.trim(),
+    age: parseInt(ageInput.value, 10),
+    gender: genderInput.value,
+    department: departmentInput.value,
+    phone: phoneInput.value.trim(),
+    notes: notesInput.value.trim(),
   };
-  reader.readAsText(file);
-}
 
-function exportCSV() {
-  const rows = patients.map(p => [p.name, p.age, p.gender, p.department, p.phone, p.notes].join(','));
-  const csv = rows.join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'patients.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
+  if (!payload.name || !payload.age || !payload.gender || !payload.department) {
+    alert("Please fill all required fields.");
+    return;
+  }
 
-// Demo patients
-patients = [
-  { id: '1', name: 'John Doe', age: 45, gender: 'Male', department: 'Cardiology', phone: '1234567890', notes: '', admission_date: '10/08/2025', status: 'Admitted' },
-  { id: '2', name: 'Jane Smith', age: 32, gender: 'Female', department: 'Neurology', phone: '9876543210', notes: '', admission_date: '09/08/2025', status: 'Admitted' }
-];
-applyFilters();
+  try {
+    let res;
+    if (id) {
+      // Update
+      res = await fetch(`${API_BASE}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      // Create
+      res = await fetch(API_BASE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Failed to save patient");
+    }
+
+    patientForm.reset();
+    patientIdInput.value = "";
+    await fetchPatients(currentPage);
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  patientForm.reset();
+  patientIdInput.value = "";
+});
+
+prevPageBtn.addEventListener("click", () => {
+  if (currentPage > 1) {
+    fetchPatients(currentPage - 1);
+  }
+});
+nextPageBtn.addEventListener("click", () => {
+  fetchPatients(currentPage + 1);
+});
+
+searchInput.addEventListener("input", () => fetchPatients(1));
+filterDept.addEventListener("change", () => fetchPatients(1));
+sortBySelect.addEventListener("change", () => fetchPatients(1));
+orderSelect.addEventListener("change", () => fetchPatients(1));
+
+refreshBtn.addEventListener("click", () => fetchPatients(currentPage));
+
+statsBtn.addEventListener("click", async () => {
+  try {
+    // For example stats: count patients by department and status
+    const res = await fetch(API_BASE);
+    if (!res.ok) throw new Error("Failed to fetch patients for stats");
+    const data = await res.json();
+
+    const countsByDept = {};
+    const countsByStatus = {};
+
+    data.items.forEach((p) => {
+      countsByDept[p.department] = (countsByDept[p.department] || 0) + 1;
+      countsByStatus[p.status] = (countsByStatus[p.status] || 0) + 1;
+    });
+
+    const deptStats = Object.entries(countsByDept)
+      .map(([d, c]) => `<li>${d}: <strong>${c}</strong></li>`)
+      .join("");
+    const statusStats = Object.entries(countsByStatus)
+      .map(([s, c]) => `<li>${s}: <strong>${c}</strong></li>`)
+      .join("");
+
+    statsBody.innerHTML = `
+      <h6>Patients by Department</h6>
+      <ul>${deptStats || "<li>No data</li>"}</ul>
+      <h6>Patients by Status</h6>
+      <ul>${statusStats || "<li>No data</li>"}</ul>
+    `;
+
+    statsCard.classList.toggle("d-none");
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+importCsvBtn.addEventListener("click", () => {
+  importFileInput.click();
+});
+
+importFileInput.addEventListener("change", async () => {
+  const file = importFileInput.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const res = await fetch("/import_csv", {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Failed to import CSV");
+    }
+    alert("CSV imported successfully!");
+    importFileInput.value = "";
+    fetchPatients(currentPage);
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+exportBtn.addEventListener("click", () => {
+  // Direct download via link
+  const link = document.createElement("a");
+  link.href = "/export_csv";
+  link.download = "patients.csv";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
+
+// Initial load
+fetchPatients(currentPage);
