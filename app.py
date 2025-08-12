@@ -3,6 +3,7 @@ from flask_cors import CORS
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from bson.objectid import ObjectId
 from datetime import datetime
+import urllib.parse as parser
 import os
 import io
 import csv
@@ -10,8 +11,11 @@ import csv
 app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app)
 
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
-client = MongoClient(MONGO_URI)
+uname = parser.quote_plus("Rajat")
+passwd = parser.quote_plus("2844")
+cluster = "cluster0.gpq2duh"
+url = f"mongodb+srv://{uname}:{passwd}@{cluster}.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tlsAllowInvalidCertificates=true"
+client = MongoClient(url)
 db = client["hospital_db"]
 patients = db["patients"]
 
